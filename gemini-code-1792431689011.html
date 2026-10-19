@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulado Interativo de Inglês</title>
+  <style>
+    /* Reset & Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #0f172a;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #000;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* Scrollbar Estilizada */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 5px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #dc2626;
+      border-radius: 5px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #b91c1c;
+    }
+
+    /* Header e Navegação */
+    header {
+      width: 100%;
+      max-width: 850px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #ffffff;
+      margin-bottom: 15px;
+      font-size: 1.8rem;
+    }
+
+    .nav-grid {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      border: 2px solid #ffffff;
+      background-color: #1e293b;
+      color: #ffffff;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background-color: #334155;
+    }
+
+    .nav-btn.active {
+      border-color: #f59e0b;
+      box-shadow: 0 0 8px #f59e0b;
+    }
+
+    .nav-btn.correct {
+      background-color: #16a34a !important;
+      border-color: #16a34a !important;
+      color: #fff;
+    }
+
+    .nav-btn.incorrect {
+      background-color: #dc2626 !important;
+      border-color: #dc2626 !important;
+      color: #fff;
+    }
+
+    /* Container Principal */
+    .container {
+      background-color: #ffffff;
+      border: 3px solid #dc2626;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 850px;
+      padding: 30px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+
+    .question-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #000;
+    }
+
+    /* Pinned Text (Texto Fixo com Scroll) */
+    .pinned-text-box {
+      max-height: 200px;
+      overflow-y: auto;
+      background-color: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid #dc2626;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #000;
+    }
+
+    .pinned-text-box h4 {
+      margin-bottom: 8px;
+      color: #dc2626;
+    }
+
+    /* Enunciado */
+    .statement {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      color: #000;
+      font-weight: 500;
+    }
+
+    /* Opções de Resposta */
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .option-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 12px 15px;
+      border: 2px solid #cbd5e1;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+      background-color: #fff;
+    }
+
+    .option-item:hover {
+      background-color: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .option-item input[type="radio"] {
+      margin-top: 4px;
+      margin-right: 12px;
+      cursor: pointer;
+    }
+
+    .option-text {
+      font-size: 1rem;
+      color: #000;
+      line-height: 1.4;
+    }
+
+    .option-item.selected {
+      border-color: #dc2626;
+      background-color: #fef2f2;
+    }
+
+    .option-item.correct-bg {
+      background-color: #dcfce7 !important;
+      border-color: #16a34a !important;
+    }
+
+    .option-item.incorrect-bg {
+      background-color: #fee2e2 !important;
+      border-color: #dc2626 !important;
+    }
+
+    /* Justificativa / Feedback */
+    .feedback-box {
+      display: none;
+      background-color: #f8fafc;
+      border-left: 4px solid #0284c7;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #000;
+    }
+
+    .feedback-box.show {
+      display: block;
+    }
+
+    .feedback-box strong {
+      color: #0284c7;
+    }
+
+    /* Botões de Ação */
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .btn {
+      background-color: #dc2626;
+      color: #ffffff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      flex: 1;
+      max-width: 150px;
+      text-align: center;
+    }
+
+    .btn:hover {
+      background-color: #b91c1c;
+    }
+
+    .btn:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .btn-finish {
+      background-color: #16a34a;
+      max-width: 200px;
+    }
+
+    .btn-finish:hover {
+      background-color: #15803d;
+    }
+
+    /* Modal de Resultado Final */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.75);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background-color: #ffffff;
+      border: 3px solid #dc2626;
+      border-radius: 10px;
+      max-width: 650px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 30px;
+      color: #000;
+    }
+
+    .modal-header {
+      text-align: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+
+    .modal-header h2 {
+      color: #dc2626;
+      font-size: 1.8rem;
+    }
+
+    .score-display {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 15px;
+      color: #0f172a;
+    }
+
+    .stats-container {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+      background-color: #f8fafc;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+
+    .stat-value.correct { color: #16a34a; }
+    .stat-value.incorrect { color: #dc2626; }
+
+    .diagnostics-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #0f172a;
+    }
+
+    .diagnostics-list {
+      list-style-type: disc;
+      padding-left: 20px;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .modal-footer {
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+      .action-buttons {
+        flex-direction: row;
+      }
+      .btn {
+        padding: 10px 10px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Simulado de Língua Inglesa</h1>
+    <div class="nav-grid" id="nav-grid">
+      <!-- Botões de 1 a 10 gerados via JS -->
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="question-header">
+      <span class="question-title" id="question-title">Questão 1 de 10</span>
+    </div>
+
+    <!-- Pinned Text (Exibido apenas em questões com texto base) -->
+    <div class="pinned-text-box" id="pinned-text-box" style="display: none;">
+      <h4>Texto Base:</h4>
+      <p id="pinned-text-content"></p>
+    </div>
+
+    <!-- Enunciado -->
+    <div class="statement" id="statement-text">
+      <!-- Enunciado será carregado aqui -->
+    </div>
+
+    <!-- Opções -->
+    <div class="options-list" id="options-list">
+      <!-- Opções serão carregadas aqui -->
+    </div>
+
+    <!-- Justificativa -->
+    <div class="feedback-box" id="feedback-box">
+      <strong>Justificativa:</strong> <span id="feedback-text"></span>
+    </div>
+
+    <!-- Botões de Ação na Ordem Obrigatória: [ Next ] [ Check ] [ Previous ] -->
+    <div class="action-buttons">
+      <button class="btn" id="btn-next" onclick="nextQuestion()">Next</button>
+      <button class="btn" id="btn-check" onclick="checkAnswer()">Check</button>
+      <button class="btn" id="btn-prev" onclick="prevQuestion()">Previous</button>
+    </div>
+  </main>
+
+  <!-- Modal de Desempenho Final -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Resultado do Simulado</h2>
+      </div>
+      <div class="score-display" id="score-display">
+        Sua Nota: 0,0 / 8,0
+      </div>
+      <div class="stats-container">
+        <div class="stat-item">
+          <div>Acertos</div>
+          <div class="stat-value correct" id="stat-correct">0 (0%)</div>
+        </div>
+        <div class="stat-item">
+          <div>Erros</div>
+          <div class="stat-value incorrect" id="stat-incorrect">0 (0%)</div>
+        </div>
+      </div>
+      <div class="diagnostics-title">Diagnóstico e Recomendações Pedagógicas:</div>
+      <ul class="diagnostics-list" id="diagnostics-list">
+        <!-- Recomendações dinâmicas serão inseridas aqui -->
+      </ul>
+      <div class="modal-footer">
+        <button class="btn btn-finish" onclick="restartQuiz()">Refazer Simulado</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // TEXTO BASE PARA QUESTÕES 1 E 2
+    const textBase12 = `"Global Environmental Challenges and Possible Solutions"\n\n` +
+      `According to a report by the World Health Organization (WHO), nearly 99% of the global population breathes air that exceeds safety limits. ` +
+      `In 2021 alone, ambient and household air pollution caused around 6.6 million premature deaths worldwide. Environmental scientists from the International ` +
+      `Union for Conservation of Nature (IUCN) also estimate that between 15% and 31% of all microplastics in the ocean originate from primary land-based sources, ` +
+      `such as synthetic clothing and vehicle tire wear. These scientific data demonstrate that toxic emissions and industrial waste present severe risks to human health ` +
+      `and natural ecosystems across the entire planet.\n\n` +
+      `However, environmental experts emphasize that this situation can be significantly improved under specific technical and political conditions. For instance, ` +
+      `if governments implemented strict clean energy policies and invested in public electric transportation, urban air pollution would drop by up to 45% within a decade. ` +
+      `Furthermore, if global industries reduced plastic packaging production by 5% each year, microplastic accumulation in marine environments would stabilize before ` +
+      `the end of the century. Therefore, resolving environmental degradation requires international cooperation, enforcement of ecological laws, and immediate industrial structural changes.`;
+
+    // ESTRUTURA DOS DADOS DAS QUESTÕES
+    // As alternativas originais são rotuladas por chaves. A resposta correta é mapeada pela chave.
+    const rawQuestions = [
+      {
+        id: 1,
+        topic: "Compreensão Textual e Condicionais",
+        pinnedText: textBase12,
+        statement: "Ao analisar a estruturação das informações no texto, percebe-se que o autor organiza as evidências científicas e as propostas ecológicas com um propósito comunicativo específico. O objetivo principal do texto é:",
+        correctKey: "D",
+        options: {
+          A: "Demonstrar a ineficácia das políticas ecológicas atuais diante de dados estatísticos irreversíveis de contaminação atmosférica e marinha.",
+          B: "Alertar os leitores sobre como as escolhas individuais de consumo de plásticos e transportes são as únicas causadoras de mortes prematuras no mundo.",
+          C: "Provar cientificamente que a poluição do ar e o acúmulo de microplásticos já atingiram seus níveis máximos e tendem a se estabilizar naturalmente até o fim do século.",
+          D: "Sensibilizar o leitor sobre a urgência do problema ambiental, apresentando dados de degradação e condicionando a mitigação à adoção de medidas governamentais e industriais.",
+          E: "Exigir a substituição imediata de toda a frota global de veículos a combustível fósseis como a única solução viável para combater as doenças respiratórias."
+        },
+        justification: "Resposta correta: D. O texto inicia apresentando estatísticas alarmantes sobre poluição atmosférica e marinha (1º parágrafo) para contextualizar a gravidade da situação. Em seguida (2º parágrafo), o autor utiliza estruturas condicionais ('if governments implemented...', 'if global industries reduced...') para demonstrar que a melhoria do quadro depende de ações estruturais, políticas e industriais."
+      },
+      {
+        id: 2,
+        topic: "Compreensão Textual e Condicionais",
+        pinnedText: textBase12,
+        statement: "No texto, são utilizadas diferentes estruturas linguísticas para relatar fatos comprovados e para construir cenários de possibilidade ou projeções hipotéticas. Assinale a alternativa que contém uma oração extraída do texto que expressa uma situação imaginária ou condicional:",
+        correctKey: "A",
+        options: {
+          A: "\"...if governments implemented strict clean energy policies and invested in public electric transportation...\"",
+          B: "\"According to a report by the World Health Organization (WHO), nearly 99% of the global population breathes air that exceeds safety limits.\"",
+          C: "\"In 2021 alone, ambient and household air pollution caused around 6.6 million premature deaths worldwide.\"",
+          D: "\"These scientific data demonstrate that toxic emissions and industrial waste present severe risks...\"",
+          E: "\"Therefore, resolving environmental degradation requires international cooperation...\""
+        },
+        justification: "Resposta correta: A. A oração da alternativa A inicia com a conjunção condicional 'if' acompanhada de verbos no passado (implemented, invested), formando a estrutura da segunda condicional em inglês (Second Conditional). Essa estrutura é usada justamente para expressar cenários hipotéticos, imaginários ou possibilidades futuras dependentes de uma condição."
+      },
+      {
+        id: 3,
+        topic: "Pronomes Relativos em Diálogos",
+        pinnedText: null,
+        statement: "Leia o diálogo abaixo:\n\n" +
+          "<b>Sarah:</b> Did you hear about the software developer <b>who</b> designed the new security protocol for our database?\n" +
+          "<b>Mark:</b> Yes, she is the engineer that the CEO praised during yesterday's general meeting.\n\n" +
+          "No diálogo acima, o pronome relativo em negrito (<b>who</b>) refere-se a:",
+        correctKey: "B",
+        options: {
+          A: "The CEO (O Diretor Executivo).",
+          B: "The software developer (A desenvolvedora de software).",
+          C: "The new security protocol (O novo protocolo de segurança).",
+          D: "Our database (Nosso banco de dados).",
+          E: "Yesterday's general meeting (A reunião geral de ontem)."
+        },
+        justification: "Resposta correta: B. O pronome relativo 'who' é utilizado exclusivamente para se referir a pessoas e introduz a oração adjetiva que especifica a pessoa em questão: 'the software developer'. O termo 'designed the new security protocol' qualifica essa desenvolvedora."
+      },
+      {
+        id: 4,
+        topic: "Pronomes Relativos em Diálogos",
+        pinnedText: null,
+        statement: "Leia o diálogo abaixo:\n\n" +
+          "<b>Lucas:</b> I managed to read the internal audit report <b>which</b> highlighted severe compliance errors in the financial department.\n" +
+          "<b>Elena:</b> That explains why the manager requested an emergency meeting with the board of directors.\n\n" +
+          "No diálogo acima, o pronome relativo em negrito (<b>which</b>) refere-se a:",
+        correctKey: "C",
+        options: {
+          A: "The financial department (O departamento financeiro).",
+          B: "The manager (O gerente).",
+          C: "The internal audit report (O relatório de auditoria interna).",
+          D: "Severe compliance errors (Erros graves de conformidade).",
+          E: "An emergency meeting (Uma reunião de emergência)."
+        },
+        justification: "Resposta correta: C. O pronome relativo 'which' refere-se a coisas, objetos ou conceitos inanimados. Na frase, ele introduz a oração explicativa/especificativa que especifica o sujeito antecedente inanimado: 'the internal audit report'."
+      },
+      {
+        id: 5,
+        topic: "Substituição por That",
+        pinnedText: null,
+        statement: "O pronome relativo 'that' pode substituir 'who' ou 'which' sob determinadas regras sintáticas (especialmente em Defining Relative Clauses, onde não há vírgulas). Assinale a ÚNICA alternativa em que o pronome relativo sublinhado PODE ser corretamente substituído por 'that' sem alterar a gramaticalidade da frase:",
+        correctKey: "E",
+        options: {
+          A: "Dr. Aris, <u>who</u> led the groundbreaking research in neuroscience, received the Nobel Prize.",
+          B: "The central server, <u>which</u> was installed last month, crashed due to a power outage.",
+          C: "The financial analyst spoke to the senior director, to <u>whom</u> the quarterly report had been sent.",
+          D: "Her newest book, <u>which</u> explores quantum physics, became an immediate bestseller.",
+          E: "The research team analyzed the artificial intelligence model <u>which</u> was developed by the engineers."
+        },
+        justification: "Resposta correta: E. O pronome 'that' só pode ser usado em 'Defining Relative Clauses' (orações restritivas), as quais não vêm separadas por vírgulas nem precedidas por preposição. Nas opções A, B e D, as orações são 'Non-Defining' (entre vírgulas), o que proíbe o uso de 'that'. Na opção C, o pronome está diretamente após a preposição 'to' ('to whom'), inviabilizando 'that'. Portanto, apenas o item E permite a substituição."
+      },
+      {
+        id: 6,
+        topic: "Restrições do Uso de That",
+        pinnedText: null,
+        statement: "Considere as regras sobre o uso de pronomes relativos em inglês. Assinale a ÚNICA alternativa na qual o pronome relativo NÃO pode, de forma alguma, ser substituído por 'that':",
+        correctKey: "C",
+        options: {
+          A: "The algorithms which control autonomous vehicles require constant evaluation.",
+          B: "The researchers who discovered the new biological species were awarded a grant.",
+          C: "Professor Harrison, who published three books on global economy, will deliver the keynote speech.",
+          D: "The environmental law which passed yesterday imposes strict limitations on carbon emissions.",
+          E: "The candidate who performs best during the technical simulation will be hired immediately."
+        },
+        justification: "Resposta correta: C. A oração 'who published three books on global economy' é uma 'Non-Defining Relative Clause' (oração explicativa, isolada por vírgulas). Em inglês standard, o pronome relativo 'that' é estritamente proibido em orações explicativas (entre vírgulas)."
+      },
+      {
+        id: 7,
+        topic: "Junção de Frases com Non-Defining Clauses",
+        pinnedText: null,
+        statement: "Considere as duas orações abaixo:\n" +
+          "1. <i>The new particle accelerator cost over five billion dollars to construct.</i>\n" +
+          "2. <i>It was built near Geneva by an international team of physicists.</i>\n\n" +
+          "Assinale a alternativa que combina corretamente as duas frases em um único período composto, utilizando uma <b>Non-Defining Relative Clause</b> estruturada com extrema precisão gramatical:",
+        correctKey: "A",
+        options: {
+          A: "The new particle accelerator, which was built near Geneva by an international team of physicists, cost over five billion dollars to construct.",
+          B: "The new particle accelerator that was built near Geneva by an international team of physicists cost over five billion dollars to construct.",
+          C: "The new particle accelerator, that was built near Geneva by an international team of physicists cost over five billion dollars to construct.",
+          D: "The new particle accelerator, which it was built near Geneva by an international team of physicists, cost over five billion dollars to construct.",
+          E: "The new particle accelerator who was built near Geneva by an international team of physicists, cost over five billion dollars to construct."
+        },
+        justification: "Resposta correta: A. A opção A utiliza corretamente a 'Non-Defining Clause' entre duas vírgulas com o pronome 'which'. A opção B forma uma 'Defining Clause' (sem vírgulas e com 'that'). A opção C tenta usar 'that' em oração explicativa e comete erro de pontuação (falta a vírgula de fechamento). A opção D comete pleonasmo mantendo o pronome 'it' junto a 'which'. A opção E usa 'who' para um objeto inanimado ('accelerator')."
+      },
+      {
+        id: 8,
+        topic: "Junção de Frases com Non-Defining Clauses",
+        pinnedText: null,
+        statement: "Considere as duas orações abaixo:\n" +
+          "1. <i>Dr. Eleanor Vance has just received a prestigious international scientific award.</i>\n" +
+          "2. <i>Her breakthrough research on genetic sequencing revolutionized modern epidemiology.</i>\n\n" +
+          "Assinale a alternativa que combina as frases acima de forma correta e formal, utilizando o pronome relativo adequado para estabelecer uma relação de posse em uma <b>Non-Defining Relative Clause</b>:",
+        correctKey: "C",
+        options: {
+          A: "Dr. Eleanor Vance, who her breakthrough research on genetic sequencing revolutionized modern epidemiology, has just received a prestigious international scientific award.",
+          B: "Dr. Eleanor Vance, whom breakthrough research on genetic sequencing revolutionized modern epidemiology, has just received a prestigious international scientific award.",
+          C: "Dr. Eleanor Vance, whose breakthrough research on genetic sequencing revolutionized modern epidemiology, has just received a prestigious international scientific award.",
+          D: "Dr. Eleanor Vance whose breakthrough research on genetic sequencing revolutionized modern epidemiology has just received a prestigious international scientific award.",
+          E: "Dr. Eleanor Vance, that her breakthrough research on genetic sequencing revolutionized modern epidemiology, has just received a prestigious international scientific award."
+        },
+        justification: "Resposta correta: C. Para exprimir posse ('Her breakthrough research'), o único pronome relativo correto é 'whose'. Como se trata de uma pessoa de nome próprio (informação adicional), a oração é 'Non-Defining' e deve ser devidamente isolada por vírgulas (o que invalida a opção D, que omitiu as vírgulas). As opções A e E cometem repetição incorreta ('who her' / 'that her') e a opção B usa erroneamente 'whom' como sujeito possessivo."
+      },
+      {
+        id: 9,
+        topic: "Junção de Frases com Non-Defining Clauses",
+        pinnedText: null,
+        statement: "Considere as duas orações abaixo:\n" +
+          "1. <i>The supreme court justice delivered a landmark judicial ruling on digital privacy rights.</i>\n" +
+          "2. <i>Several prominent legal scholars had criticized him during the constitutional debates.</i>\n\n" +
+          "Assinale a alternativa que unifica com precisão gramatical as duas orações em uma <b>Non-Defining Relative Clause</b> na qual o pronome relativo atua como objeto da oração:",
+        correctKey: "E",
+        options: {
+          A: "The supreme court justice, who several prominent legal scholars had criticized him during the constitutional debates, delivered a landmark judicial ruling on digital privacy rights.",
+          B: "The supreme court justice, which several prominent legal scholars had criticized during the constitutional debates, delivered a landmark judicial ruling on digital privacy rights.",
+          C: "The supreme court justice, that several prominent legal scholars had criticized during the constitutional debates, delivered a landmark judicial ruling on digital privacy rights.",
+          D: "The supreme court justice whom several prominent legal scholars had criticized during the constitutional debates delivered a landmark judicial ruling on digital privacy rights.",
+          E: "The supreme court justice, whom several prominent legal scholars had criticized during the constitutional debates, delivered a landmark judicial ruling on digital privacy rights."
+        },
+        justification: "Resposta correta: E. O pronome 'whom' é a forma formal adequada para objeto de pessoa em orações adjetivas. Por referir-se a uma figura específica em contexto explicativo ('Non-Defining Clause'), exige o uso obrigatório de vírgulas de abertura e fechamento (o que invalida a D). A opção A mantém redundante o pronome de objeto 'him'. A opção B usa 'which' para pessoa. A opção C usa 'that' em oração isolada por vírgulas."
+      },
+      {
+        id: 10,
+        topic: "Junção de Frases com Non-Defining Clauses",
+        pinnedText: null,
+        statement: "Considere as duas orações abaixo:\n" +
+          "1. <i>The global pharmaceutical headquarters was recently relocated to Zurich.</i>\n" +
+          "2. <i>The CEO had signed a multi-million dollar agreement in that facility.</i>\n\n" +
+          "Assinale a alternativa que combina as orações de forma culta e impecável, mantendo a estrutura de uma <b>Non-Defining Relative Clause</b> regida por preposição posterior ou pronome equivalente:",
+        correctKey: "B",
+        options: {
+          A: "The global pharmaceutical headquarters, in where the CEO had signed a multi-million dollar agreement, was recently relocated to Zurich.",
+          B: "The global pharmaceutical headquarters, in which the CEO had signed a multi-million dollar agreement, was recently relocated to Zurich.",
+          C: "The global pharmaceutical headquarters, in that the CEO had signed a multi-million dollar agreement, was recently relocated to Zurich.",
+          D: "The global pharmaceutical headquarters where the CEO had signed a multi-million dollar agreement was recently relocated to Zurich.",
+          E: "The global pharmaceutical headquarters, which the CEO had signed a multi-million dollar agreement in it, was recently relocated to Zurich."
+        },
+        justification: "Resposta correta: B. A regência da preposição 'in' antecedendo o pronome relativo de coisas/lugares formal resulta na estrutura 'in which'. Por se tratar de oração explicativa ('Non-Defining'), deve estar entre vírgulas. A opção A funde 'in' com 'where' (pleonasmo). A opção C usa 'in that' (incorreto em orações adjetivas). A opção D remove as vírgulas transformando em 'Defining'. A opção E mantém 'in it' de forma redundante no final."
+      }
+    ];
+
+    // ESTADO DA APLICAÇÃO E RANDOMIZAÇÃO
+    let processedQuestions = [];
+    let userAnswers = {}; // { questionIndex: selectedLetter }
+    let checkedQuestions = {}; // { questionIndex: boolean }
+    let currentQuestionIndex = 0;
+
+    // Função de Embaralhamento (Fisher-Yates)
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // Inicialização e Embaralhamento das Opções para evitar padrões de gabarito
+    function initQuizData() {
+      processedQuestions = rawQuestions.map((q) => {
+        // Mapear as 5 opções com suas chaves originais
+        const originalKeys = ['A', 'B', 'C', 'D', 'E'];
+        const optionsList = originalKeys.map(key => ({
+          originalKey: key,
+          text: q.options[key]
+        }));
+
+        // Embaralhar a ordem visual das opções
+        const shuffledOptions = shuffleArray(optionsList);
+
+        // Atribuir os novos rótulos A, B, C, D, E às opções embaralhadas
+        const newLetterLabels = ['A', 'B', 'C', 'D', 'E'];
+        let mappedCorrectLetter = '';
+
+        const finalOptions = shuffledOptions.map((opt, index) => {
+          const currentLabel = newLetterLabels[index];
+          if (opt.originalKey === q.correctKey) {
+            mappedCorrectLetter = currentLabel;
+          }
+          return {
+            label: currentLabel,
+            text: opt.text,
+            originalKey: opt.originalKey
+          };
+        });
+
+        return {
+          ...q,
+          displayOptions: finalOptions,
+          correctDisplayLetter: mappedCorrectLetter
+        };
+      });
+    }
+
+    // RENDERIZAÇÃO DA INTERFACE
+    function buildNavGrid() {
+      const navGrid = document.getElementById('nav-grid');
+      navGrid.innerHTML = '';
+      for (let i = 0; i < processedQuestions.length; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'nav-btn';
+        btn.id = `nav-btn-${i}`;
+        btn.innerText = i + 1;
+        btn.onclick = () => jumpToQuestion(i);
+        navGrid.appendChild(btn);
+      }
+      updateNavStatus();
+    }
+
+    function updateNavStatus() {
+      for (let i = 0; i < processedQuestions.length; i++) {
+        const btn = document.getElementById(`nav-btn-${i}`);
+        btn.classList.remove('active', 'correct', 'incorrect');
+
+        if (i === currentQuestionIndex) {
+          btn.classList.add('active');
+        }
+
+        if (checkedQuestions[i]) {
+          const isCorrect = userAnswers[i] === processedQuestions[i].correctDisplayLetter;
+          if (isCorrect) {
+            btn.classList.add('correct');
+          } else {
+            btn.classList.add('incorrect');
+          }
+        }
+      }
+    }
+
+    function renderQuestion(index) {
+      const q = processedQuestions[index];
+
+      // Atualizar Título
+      document.getElementById('question-title').innerText = `Questão ${index + 1} de 10`;
+
+      // Pinned Text Box
+      const pinnedBox = document.getElementById('pinned-text-box');
+      const pinnedContent = document.getElementById('pinned-text-content');
+      if (q.pinnedText) {
+        pinnedContent.innerText = q.pinnedText;
+        pinnedBox.style.display = 'block';
+      } else {
+        pinnedBox.style.display = 'none';
+      }
+
+      // Enunciado
+      document.getElementById('statement-text').innerHTML = q.statement.replace(/\n/g, '<br>');
+
+      // Opções
+      const optionsContainer = document.getElementById('options-list');
+      optionsContainer.innerHTML = '';
+
+      const isChecked = checkedQuestions[index];
+
+      q.displayOptions.forEach((opt) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'option-item';
+
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = `option-${index}`;
+        radio.value = opt.label;
+        radio.id = `opt-${opt.label}`;
+        radio.disabled = !!isChecked;
+
+        if (userAnswers[index] === opt.label) {
+          radio.checked = true;
+          itemDiv.classList.add('selected');
+        }
+
+        if (isChecked) {
+          if (opt.label === q.correctDisplayLetter) {
+            itemDiv.classList.add('correct-bg');
+          } else if (userAnswers[index] === opt.label) {
+            itemDiv.classList.add('incorrect-bg');
+          }
+        } else {
+          itemDiv.onclick = () => selectOption(index, opt.label);
+        }
+
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'option-text';
+        labelSpan.innerHTML = `<strong>${opt.label})</strong> ${opt.text}`;
+
+        itemDiv.appendChild(radio);
+        itemDiv.appendChild(labelSpan);
+        optionsContainer.appendChild(itemDiv);
+      });
+
+      // Feedback / Justificativa
+      const feedbackBox = document.getElementById('feedback-box');
+      const feedbackText = document.getElementById('feedback-text');
+      if (isChecked) {
+        // Ajustar texto da justificativa se a letra da resposta correta tiver mudado com o embaralhamento
+        let textJust = q.justification;
+        textJust = textJust.replace(/Resposta correta: [A-E]\./, `Resposta correta: ${q.correctDisplayLetter}.`);
+        feedbackText.innerText = textJust;
+        feedbackBox.classList.add('show');
+      } else {
+        feedbackBox.classList.remove('show');
+      }
+
+      // Estado dos Botões
+      const btnCheck = document.getElementById('btn-check');
+      btnCheck.disabled = !userAnswers[index] || isChecked;
+
+      // Botão Next vira "Finish" na última questão
+      const btnNext = document.getElementById('btn-next');
+      if (index === processedQuestions.length - 1) {
+        btnNext.innerText = 'Finish';
+        btnNext.classList.add('btn-finish');
+      } else {
+        btnNext.innerText = 'Next';
+        btnNext.classList.remove('btn-finish');
+      }
+
+      const btnPrev = document.getElementById('btn-prev');
+      btnPrev.disabled = index === 0;
+
+      updateNavStatus();
+    }
+
+    // AÇÕES DO USUÁRIO
+    function selectOption(qIndex, label) {
+      if (checkedQuestions[qIndex]) return;
+      userAnswers[qIndex] = label;
+
+      // Atualizar classe selected na interface
+      const items = document.querySelectorAll('.option-item');
+      items.forEach(item => item.classList.remove('selected'));
+
+      const radio = document.getElementById(`opt-${label}`);
+      if (radio) {
+        radio.checked = true;
+        radio.closest('.option-item').classList.add('selected');
+      }
+
+      document.getElementById('btn-check').disabled = false;
+    }
+
+    function checkAnswer() {
+      if (!userAnswers[currentQuestionIndex]) return;
+      checkedQuestions[currentQuestionIndex] = true;
+      renderQuestion(currentQuestionIndex);
+    }
+
+    function jumpToQuestion(index) {
+      currentQuestionIndex = index;
+      renderQuestion(currentQuestionIndex);
+    }
+
+    function nextQuestion() {
+      if (currentQuestionIndex < processedQuestions.length - 1) {
+        currentQuestionIndex++;
+        renderQuestion(currentQuestionIndex);
+      } else {
+        // Ação para finalizar o simulado
+        finishQuiz();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        renderQuestion(currentQuestionIndex);
+      }
+    }
+
+    // SISTEMA DE AVALIAÇÃO FINAL E DIAGNÓSTICO
+    function finishQuiz() {
+      let totalCorrect = 0;
+      let topicErrors = {};
+      let topicTotals = {};
+
+      processedQuestions.forEach((q, idx) => {
+        const topic = q.topic;
+        if (!topicTotals[topic]) {
+          topicTotals[topic] = 0;
+          topicErrors[topic] = 0;
+        }
+        topicTotals[topic]++;
+
+        const userAns = userAnswers[idx];
+        if (userAns === q.correctDisplayLetter) {
+          totalCorrect++;
+        } else {
+          topicErrors[topic]++;
+        }
+      });
+
+      const totalQuestions = processedQuestions.length;
+      const totalIncorrect = totalQuestions - totalCorrect;
+      const score = (totalCorrect * 0.8).toFixed(1);
+
+      const correctPct = Math.round((totalCorrect / totalQuestions) * 100);
+      const incorrectPct = Math.round((totalIncorrect / totalQuestions) * 100);
+
+      document.getElementById('score-display').innerText = `Sua Nota: ${score.replace('.', ',')} / 8,0`;
+      document.getElementById('stat-correct').innerText = `${totalCorrect} (${correctPct}%)`;
+      document.getElementById('stat-incorrect').innerText = `${totalIncorrect} (${incorrectPct}%)`;
+
+      // Gerar Diagnóstico Pedagógico se erro no tópico for > 30%
+      const diagnosticsList = document.getElementById('diagnostics-list');
+      diagnosticsList.innerHTML = '';
+
+      let needsRevision = false;
+
+      for (const topic in topicTotals) {
+        const errors = topicErrors[topic];
+        const total = topicTotals[topic];
+        const errorPct = (errors / total) * 100;
+
+        if (errorPct > 30) {
+          needsRevision = true;
+          const li = document.createElement('li');
+          let recommendationText = "";
+
+          if (topic === "Compreensão Textual e Condicionais") {
+            recommendationText = "<strong>Compreensão Textual e Condicionais:</strong> Revisar a estrutura de condicional (Second Conditional: if + past simple -> would + verb) e técnicas de identificação do objetivo comunicativo em textos expositivos/científicos.";
+          } else if (topic === "Pronomes Relativos em Diálogos") {
+            recommendationText = "<strong>Pronomes Relativos em Diálogos:</strong> Reforçar a identificação dos referentes antecedente de <i>who</i> (pessoas) e <i>which</i> (objetos/conceitos) em textos e diálogos.";
+          } else if (topic === "Substituição por That" || topic === "Restrições do Uso de That") {
+            recommendationText = "<strong>Uso e Restrições de 'That':</strong> Atenção às regras: <i>that</i> NÃO pode ser utilizado em orações explicativas (Non-Defining Clauses, entre vírgulas) nem após preposições.";
+          } else if (topic === "Junção de Frases com Non-Defining Clauses") {
+            recommendationText = "<strong>Junção de Frases com Non-Defining Clauses:</strong> Praticar a junção de orações com pronomes relativos (<i>which, whose, whom, in which</i>) prestando extrema atenção ao uso obrigatório de vírgulas, eliminações de pronomes redundantes e à regência de preposições.";
+          } else {
+            recommendationText = `<strong>${topic}:</strong> Recomenda-se revisar os conceitos gramaticais e de leitura associados a este tópico (Percentual de erro: ${Math.round(errorPct)}%).`;
+          }
+
+          li.innerHTML = recommendationText;
+          diagnosticsList.appendChild(li);
+        }
+      }
+
+      if (!needsRevision) {
+        const li = document.createElement('li');
+        li.innerHTML = "<strong>Parabéns!</strong> Você demonstrou excelente domínio em todos os tópicos avaliados (taxa de erro inferior a 30% em todas as áreas). Continue praticando para manter o alto nível!";
+        diagnosticsList.appendChild(li);
+      }
+
+      // Exibir Modal
+      document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function restartQuiz() {
+      userAnswers = {};
+      checkedQuestions = {};
+      currentQuestionIndex = 0;
+      document.getElementById('modal-overlay').style.display = 'none';
+      initQuizData();
+      buildNavGrid();
+      renderQuestion(0);
+    }
+
+    // Inicialização ao carregar a página
+    window.onload = function() {
+      initQuizData();
+      buildNavGrid();
+      renderQuestion(0);
+    };
+  </script>
+</body>
+</html>
