@@ -489,7 +489,7 @@
           D: "\"These scientific data demonstrate that toxic emissions and industrial waste present severe risks...\"",
           E: "\"Therefore, resolving environmental degradation requires international cooperation...\""
         },
-        justification: "Resposta correta: A. A oração da alternativa A inicia com a conjunção condicional 'if' acompanhada de verbos no passado (implemented, invested), formando a estrutura da segunda condicional em inglês (Second Conditional). Essa estrutura é usada justamente para expressar cenários hipotéticos, imaginários ou possibilidades futuras dependentes de uma condição."
+        justification: "Resposta correta: A. A oração da alternativa A inicia com a conjunção condicional 'if' acompanhada de verbos no passado (implemented, invested), forming a estrutura da segunda condicional em inglês (Second Conditional). Essa estrutura é usada justamente para expressar cenários hipotéticos, imaginários ou possibilidades futuras dependentes de uma condição."
       },
       {
         id: 3,
@@ -699,6 +699,7 @@
     function updateNavStatus() {
       for (let i = 0; i < processedQuestions.length; i++) {
         const btn = document.getElementById(`nav-btn-${i}`);
+        if (!btn) continue;
         btn.classList.remove('active', 'correct', 'incorrect');
 
         if (i === currentQuestionIndex) {
@@ -867,4 +868,86 @@
         topicTotals[topic]++;
 
         const userAns = userAnswers[idx];
-        if (userAns === q.correct
+        if (userAns === q.correctDisplayLetter) {
+          totalCorrect++;
+        } else {
+          topicErrors[topic]++;
+        }
+      });
+
+      const totalQuestions = processedQuestions.length;
+      const totalIncorrect = totalQuestions - totalCorrect;
+      
+      // Nota final de 0.0 a 10.0 (1,0 ponto por questão)
+      const score = (totalCorrect * 1.0).toFixed(1);
+
+      const correctPct = Math.round((totalCorrect / totalQuestions) * 100);
+      const incorrectPct = Math.round((totalIncorrect / totalQuestions) * 100);
+
+      document.getElementById('score-display').innerText = `Sua Nota: ${score.replace('.', ',')} / 10,0`;
+      document.getElementById('stat-correct').innerText = `${totalCorrect} (${correctPct}%)`;
+      document.getElementById('stat-incorrect').innerText = `${totalIncorrect} (${incorrectPct}%)`;
+
+      // Gerar Diagnóstico Pedagógico se erro no tópico for > 30%
+      const diagnosticsList = document.getElementById('diagnostics-list');
+      diagnosticsList.innerHTML = '';
+
+      let needsRevision = false;
+
+      for (const topic in topicTotals) {
+        const errors = topicErrors[topic];
+        const total = topicTotals[topic];
+        const errorPct = (errors / total) * 100;
+
+        if (errorPct > 30) {
+          needsRevision = true;
+          const li = document.createElement('li');
+          let recommendationText = "";
+
+          if (topic === "Compreensão Textual e Condicionais") {
+            recommendationText = "<strong>Compreensão Textual e Condicionais:</strong> Revisar a estrutura de condicional (Second Conditional: if + past simple -> would + verb) e técnicas de identificação do objetivo comunicativo em textos expositivos/científicos.";
+          } else if (topic === "Pronomes Relativos em Diálogos") {
+            recommendationText = "<strong>Pronomes Relativos em Diálogos:</strong> Reforçar a identificação dos referentes antecedente de <i>who</i> (pessoas) e <i>which</i> (objetos/conceitos) em textos e diálogos.";
+          } else if (topic === "Substituição por That" || topic === "Restrições do Uso de That") {
+            recommendationText = "<strong>Uso e Restrições de 'That':</strong> Atenção às regras: <i>that</i> NÃO pode ser utilizado em orações explicativas (Non-Defining Clauses, entre vírgulas) nem após preposições.";
+          } else if (topic === "Junção de Frases com Non-Defining Clauses") {
+            recommendationText = "<strong>Junção de Frases com Non-Defining Clauses:</strong> Praticar a junção de orações com pronomes relativos (<i>who, which, that</i>) prestando extrema atenção ao uso obrigatório de vírgulas e eliminações de pronomes redundantes.";
+          } else {
+            recommendationText = `<strong>${topic}:</strong> Recomenda-se revisar os conceitos gramaticais e de leitura associados a este tópico (Percentual de erro: ${Math.round(errorPct)}%).`;
+          }
+
+          li.innerHTML = recommendationText;
+          diagnosticsList.appendChild(li);
+        }
+      }
+
+      if (!needsRevision) {
+        const li = document.createElement('li');
+        li.innerHTML = "<strong>Parabéns!</strong> Você demonstrou excelente domínio em todos os tópicos avaliados (taxa de erro inferior a 30% em todas as áreas). Continue praticando para manter o alto nível!";
+        diagnosticsList.appendChild(li);
+      }
+
+      // Exibir Modal
+      document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function restartQuiz() {
+      userAnswers = {};
+      checkedQuestions = {};
+      currentQuestionIndex = 0;
+      document.getElementById('modal-overlay').style.display = 'none';
+      initQuizData();
+      buildNavGrid();
+      renderQuestion(0);
+    }
+
+    // Inicialização ao carregar a página
+    window.onload = function() {
+      initQuizData();
+      buildNavGrid();
+      renderQuestion(0);
+    };
+  </script>
+</body>
+</html>
+```eof
